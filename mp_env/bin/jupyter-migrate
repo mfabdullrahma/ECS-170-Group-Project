@@ -1,9 +1,0 @@
-#!/bin/sh
-'''exec' "/Users/mohamedabdullrahma/Desktop/ECS 170/ECS-170-Group-Project/mp_env/bin/python" "$0" "$@"
-' '''
-import sys
-from jupyter_core.migrate import main
-if __name__ == '__main__':
-    if sys.argv[0].endswith('.exe'):
-        sys.argv[0] = sys.argv[0][:-4]
-    sys.exit(main())
