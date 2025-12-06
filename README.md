@@ -1,3 +1,9 @@
+## Where to download dataset
+
+https://www.kaggle.com/datasets/grassknoted/asl-alphabet
+
+## Set up Virtual Environment 
+
 Ensure to set up your virtual environment and install requirements
 
 ## How to train models
