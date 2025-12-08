@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { CameraView } from "@/components/CameraView";
 import { DetectionDisplay } from "@/components/DetectionDisplay";
-import { ModelSelector } from "@/components/ModelSelector";
 import { ResearchPaper } from "@/components/ResearchPaper";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { QuizSetup, QuizActive, QuizFeedback, QuizResults } from "@/components";
 import { useTheme } from "@/hooks/useTheme";
-
-export type ModelType = "mlp" | "lstm";
+import { useQuiz } from "@/hooks/useQuiz";
+import { GraduationCap, Eye } from "lucide-react";
 
 interface Prediction {
   letter: string;
@@ -19,8 +19,31 @@ export default function Home() {
   const [detectedLetter, setDetectedLetter] = useState<string>("");
   const [confidence, setConfidence] = useState<number>(0);
   const [topPredictions, setTopPredictions] = useState<Prediction[]>([]);
-  const [selectedModel, setSelectedModel] = useState<ModelType>("mlp");
+  const [isQuizMode, setIsQuizMode] = useState(false);
   const { theme, toggleTheme } = useTheme();
+
+  const quiz = useQuiz();
+
+  // Handle detection in quiz mode
+  const handleDetection = (letter: string, conf: number, preds?: Prediction[]) => {
+    setDetectedLetter(letter);
+    setConfidence(conf);
+    if (preds) setTopPredictions(preds);
+
+    // If in quiz mode and active, check the answer
+    if (isQuizMode && quiz.quizState === "active") {
+      quiz.checkAnswer(letter);
+    }
+  };
+
+  // Toggle between quiz and detection mode
+  const toggleMode = () => {
+    setIsQuizMode(!isQuizMode);
+    if (isQuizMode) {
+      // Exiting quiz mode - reset quiz
+      quiz.resetQuiz();
+    }
+  };
 
   return (
     <div className={theme === "dark" ? "dark" : ""}>
@@ -31,14 +54,28 @@ export default function Home() {
             <div>
               <h1 className="tracking-tight">ASL Live Translator</h1>
               <p className="text-black/60 dark:text-white/60 mt-1">
-                Real-time American Sign Language Recognition
+                {isQuizMode ? "Quiz Mode - Test Your Skills" : "Real-time American Sign Language Recognition"}
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <ModelSelector
-                selectedModel={selectedModel}
-                onModelChange={setSelectedModel}
-              />
+              {/* Quiz Mode Toggle */}
+              <button
+                onClick={toggleMode}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border border-black/20 dark:border-white/20 bg-white/60 dark:bg-black/60 backdrop-blur-xl hover:bg-white/80 dark:hover:bg-black/80 transition-all"
+              >
+                {isQuizMode ? (
+                  <>
+                    <Eye className="w-4 h-4" />
+                    <span className="text-sm">Detection Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <GraduationCap className="w-4 h-4" />
+                    <span className="text-sm">Quiz Mode</span>
+                  </>
+                )}
+              </button>
+
               <ThemeToggle theme={theme} onToggle={toggleTheme} />
             </div>
           </div>
@@ -46,41 +83,100 @@ export default function Home() {
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-6 py-8 relative z-10">
-          {/* Camera and Detection Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-20 relative">
-            {/* Animated Background Spotlights */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div className="absolute w-[700px] h-[700px] bg-blue-500/40 dark:bg-blue-500/50 rounded-full blur-[130px] animate-spotlight-bg" />
-              <div className="absolute w-[500px] h-[500px] bg-blue-400/30 dark:bg-blue-400/40 rounded-full blur-[100px] animate-spotlight-bg-2" />
-            </div>
+          {isQuizMode ? (
+            /* Quiz Mode */
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-20 relative">
+              {/* Animated Background Spotlights */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute w-[700px] h-[700px] bg-purple-500/40 dark:bg-purple-500/50 rounded-full blur-[130px] animate-spotlight-bg" />
+                <div className="absolute w-[500px] h-[500px] bg-purple-400/30 dark:bg-purple-400/40 rounded-full blur-[100px] animate-spotlight-bg-2" />
+              </div>
 
-            {/* Camera View - Takes 3 columns */}
-            <div className="lg:col-span-3 relative z-10">
-              <CameraView
-                selectedModel={selectedModel}
-                onDetection={(letter, conf, preds) => {
-                  setDetectedLetter(letter);
-                  setConfidence(conf);
-                  if (preds) setTopPredictions(preds);
-                }}
-              />
-            </div>
+              {/* Quiz Content - Takes 3 columns */}
+              <div className="lg:col-span-3 relative z-10">
+                {quiz.quizState === "setup" && (
+                  <QuizSetup onStart={quiz.startQuiz} />
+                )}
 
-            {/* Detection Display - Takes 1 column */}
-            <div className="lg:col-span-1 relative z-10">
-              <DetectionDisplay 
-                letter={detectedLetter} 
-                confidence={confidence}
-                topPredictions={topPredictions}
-              />
-            </div>
-          </div>
+                {(quiz.quizState === "ready" || quiz.quizState === "active") && quiz.currentQuestion && (
+                  <div className="space-y-6">
+                    <QuizActive
+                      question={quiz.currentQuestion}
+                      score={quiz.score}
+                      timeRemaining={quiz.timeRemaining}
+                      stabilityCount={quiz.stabilityCount}
+                    />
 
-          {/* Research Paper Section */}
-          <ResearchPaper />
+                    {/* Camera View for Quiz */}
+                    <CameraView
+                      onDetection={handleDetection}
+                    />
+                  </div>
+                )}
+
+                {quiz.quizState === "feedback" && quiz.lastFeedback && (
+                  <QuizFeedback
+                    isCorrect={quiz.lastFeedback.isCorrect}
+                    targetLetter={quiz.lastFeedback.letter}
+                    onNext={quiz.nextQuestion}
+                  />
+                )}
+
+                {quiz.quizState === "results" && (
+                  <QuizResults
+                    score={quiz.score}
+                    totalQuestions={quiz.results.length}
+                    results={quiz.results}
+                    onTryAgain={() => quiz.startQuiz(quiz.results.length)}
+                    onBackToDetection={toggleMode}
+                  />
+                )}
+              </div>
+
+              {/* Detection Display - Takes 1 column (only show during active quiz) */}
+              {(quiz.quizState === "active" || quiz.quizState === "ready") && (
+                <div className="lg:col-span-1 relative z-10">
+                  <DetectionDisplay
+                    letter={detectedLetter}
+                    confidence={confidence}
+                    topPredictions={topPredictions}
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Detection Mode */
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-20 relative">
+                {/* Animated Background Spotlights */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                  <div className="absolute w-[700px] h-[700px] bg-blue-500/40 dark:bg-blue-500/50 rounded-full blur-[130px] animate-spotlight-bg" />
+                  <div className="absolute w-[500px] h-[500px] bg-blue-400/30 dark:bg-blue-400/40 rounded-full blur-[100px] animate-spotlight-bg-2" />
+                </div>
+
+                {/* Camera View - Takes 3 columns */}
+                <div className="lg:col-span-3 relative z-10">
+                  <CameraView
+                    onDetection={handleDetection}
+                  />
+                </div>
+
+                {/* Detection Display - Takes 1 column */}
+                <div className="lg:col-span-1 relative z-10">
+                  <DetectionDisplay
+                    letter={detectedLetter}
+                    confidence={confidence}
+                    topPredictions={topPredictions}
+                  />
+                </div>
+              </div>
+
+              {/* Research Paper Section */}
+              <ResearchPaper />
+            </>
+          )}
         </main>
       </div>
     </div>
   );
 }
-

@@ -3,4 +3,7 @@ export { DetectionDisplay } from "./DetectionDisplay";
 export { ModelSelector } from "./ModelSelector";
 export { ResearchPaper } from "./ResearchPaper";
 export { ThemeToggle } from "./ThemeToggle";
-
+export { QuizSetup } from "./QuizSetup";
+export { QuizActive } from "./QuizActive";
+export { QuizFeedback } from "./QuizFeedback";
+export { QuizResults } from "./QuizResults";

@@ -18,6 +18,11 @@ const config: Config = {
         "spotlight-centered": "spotlight-centered 20s ease-in-out infinite",
         "spotlight-bg": "spotlight-bg 25s ease-in-out infinite",
         "spotlight-bg-2": "spotlight-bg-2 30s ease-in-out infinite",
+        "confetti": "confetti 3s ease-out forwards",
+        "scale-in": "scale-in 0.3s ease-out",
+        "pulse-slow": "pulse-slow 3s ease-in-out infinite",
+        "gradient": "gradient 8s ease infinite",
+        "float": "float 4s ease-in-out infinite",
       },
       keyframes: {
         spotlight: {
@@ -44,6 +49,26 @@ const config: Config = {
           "50%": { transform: "translate(-5%, 10%)" },
           "75%": { transform: "translate(50%, -5%)" },
           "100%": { transform: "translate(70%, 40%)" },
+        },
+        confetti: {
+          "0%": { transform: "translateY(0) rotate(0deg)", opacity: "1" },
+          "100%": { transform: "translateY(100vh) rotate(720deg)", opacity: "0" },
+        },
+        "scale-in": {
+          "0%": { transform: "scale(0)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        "pulse-slow": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
+        },
+        gradient: {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-20px)" },
         },
       },
     },
