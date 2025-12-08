@@ -8,8 +8,6 @@ import { ResearchPaper } from "@/components/ResearchPaper";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
 
-export type ModelType = "mlp" | "lstm";
-
 interface Prediction {
   letter: string;
   confidence: number;
@@ -19,7 +17,6 @@ export default function Home() {
   const [detectedLetter, setDetectedLetter] = useState<string>("");
   const [confidence, setConfidence] = useState<number>(0);
   const [topPredictions, setTopPredictions] = useState<Prediction[]>([]);
-  const [selectedModel, setSelectedModel] = useState<ModelType>("mlp");
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -35,10 +32,7 @@ export default function Home() {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <ModelSelector
-                selectedModel={selectedModel}
-                onModelChange={setSelectedModel}
-              />
+              <ModelSelector />
               <ThemeToggle theme={theme} onToggle={toggleTheme} />
             </div>
           </div>
@@ -57,7 +51,6 @@ export default function Home() {
             {/* Camera View - Takes 3 columns */}
             <div className="lg:col-span-3 relative z-10">
               <CameraView
-                selectedModel={selectedModel}
                 onDetection={(letter, conf, preds) => {
                   setDetectedLetter(letter);
                   setConfidence(conf);
@@ -83,4 +76,3 @@ export default function Home() {
     </div>
   );
 }
-

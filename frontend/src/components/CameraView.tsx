@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Camera, CameraOff, Loader2 } from "lucide-react";
-import { useASLDetection, ModelType } from "@/hooks/useASLDetection";
+import { useASLDetection } from "@/hooks/useASLDetection";
 
 interface Prediction {
   letter: string;
@@ -10,11 +10,10 @@ interface Prediction {
 }
 
 interface CameraViewProps {
-  selectedModel: ModelType;
   onDetection: (letter: string, confidence: number, topPredictions?: Prediction[]) => void;
 }
 
-export function CameraView({ selectedModel, onDetection }: CameraViewProps) {
+export function CameraView({ onDetection }: CameraViewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -24,7 +23,6 @@ export function CameraView({ selectedModel, onDetection }: CameraViewProps) {
     videoRef,
     canvasRef,
     isActive: isCameraActive,
-    selectedModel,
     onDetection,
   });
 
@@ -103,7 +101,7 @@ export function CameraView({ selectedModel, onDetection }: CameraViewProps) {
             {!isReady && (
               <div className="flex items-center gap-2 mt-4 text-black/40 dark:text-white/40">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">Loading models...</span>
+                <span className="text-sm">Loading model...</span>
               </div>
             )}
           </div>
@@ -121,20 +119,7 @@ export function CameraView({ selectedModel, onDetection }: CameraViewProps) {
           <div className="absolute top-4 right-4 z-40">
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 dark:bg-black/90 backdrop-blur-xl border border-blue-500/50 shadow-lg">
               <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-              <span className="text-sm">
-                {selectedModel.toUpperCase()} Detecting
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Model indicator */}
-        {isCameraActive && (
-          <div className="absolute top-4 left-4 z-40">
-            <div className="px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 backdrop-blur-xl">
-              <span className="text-sm text-blue-600 dark:text-blue-400">
-                Model: {selectedModel.toUpperCase()}
-              </span>
+              <span className="text-sm">Detecting</span>
             </div>
           </div>
         )}
@@ -147,7 +132,7 @@ export function CameraView({ selectedModel, onDetection }: CameraViewProps) {
             <p className="mb-1 font-medium">Camera Feed</p>
             <p className="text-black/60 dark:text-white/60 text-sm">
               {isCameraActive
-                ? `Real-time ASL detection with ${selectedModel.toUpperCase()}`
+                ? "Real-time ASL detection active"
                 : "Start camera to begin detection"}
             </p>
           </div>
@@ -174,4 +159,3 @@ export function CameraView({ selectedModel, onDetection }: CameraViewProps) {
     </div>
   );
 }
-
