@@ -170,6 +170,10 @@ def main():
         start_time = time.time()
         predicted_label = None
 
+        stable_count = 0
+        STABLE_THRESHOLD = 40   # number of consecutive frames required
+
+
         while True:
             fps = fps_calc.get()
             ret, frame = cap.read()
@@ -197,7 +201,14 @@ def main():
             elapsed = time.time() - start_time
 
             # ---------- CORRECT ----------
+            # Stability logic
             if predicted_label == target_letter:
+                stable_count += 1
+            else:
+                stable_count = 0
+
+            # Trigger only when stable for enough frames
+            if stable_count >= STABLE_THRESHOLD:
                 correct_count += 1
 
                 cv.putText(
@@ -222,6 +233,7 @@ def main():
 
                 cv.imshow("ASL Quiz", debug)
                 cv.waitKey(0)
+                stable_count = 0  # reset for next question
                 break
 
             # ---------- INCORRECT / TIMEOUT ----------
