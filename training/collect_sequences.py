@@ -261,4 +261,3 @@ def save_sequences(sequences, output_path):
 
 if __name__ == '__main__':
     main()
-
