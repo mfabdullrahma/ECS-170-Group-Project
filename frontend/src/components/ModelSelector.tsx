@@ -1,8 +1,8 @@
 "use client";
 
-import { Brain, Layers } from "lucide-react";
+import { Brain, Database } from "lucide-react";
 
-type ModelType = "mlp" | "lstm";
+export type ModelType = "mlp" | "kaggle-mlp";
 
 interface ModelSelectorProps {
   selectedModel: ModelType;
@@ -21,20 +21,19 @@ export function ModelSelector({ selectedModel, onModelChange }: ModelSelectorPro
         }`}
       >
         <Brain className="w-4 h-4" />
-        MLP
+        MLP Model
       </button>
       <button
-        onClick={() => onModelChange("lstm")}
+        onClick={() => onModelChange("kaggle-mlp")}
         className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-all ${
-          selectedModel === "lstm"
-            ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
+          selectedModel === "kaggle-mlp"
+            ? "bg-green-500 text-white shadow-lg shadow-green-500/30"
             : "hover:bg-black/5 dark:hover:bg-white/5"
         }`}
       >
-        <Layers className="w-4 h-4" />
-        LSTM
+        <Database className="w-4 h-4" />
+        Kaggle MLP Model
       </button>
     </div>
   );
 }
-

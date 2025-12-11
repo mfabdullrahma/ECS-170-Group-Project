@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CameraView } from "@/components/CameraView";
 import { DetectionDisplay } from "@/components/DetectionDisplay";
+import { ModelSelector, type ModelType } from "@/components/ModelSelector";
 import { ResearchPaper } from "@/components/ResearchPaper";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { QuizSetup, QuizActive, QuizFeedback, QuizResults } from "@/components";
@@ -20,6 +21,7 @@ export default function Home() {
   const [confidence, setConfidence] = useState<number>(0);
   const [topPredictions, setTopPredictions] = useState<Prediction[]>([]);
   const [isQuizMode, setIsQuizMode] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<ModelType>("mlp");
   const { theme, toggleTheme } = useTheme();
 
   const quiz = useQuiz();
@@ -45,6 +47,15 @@ export default function Home() {
     }
   };
 
+  // Determine spotlight colors based on model
+  const isKaggleModel = selectedModel === "kaggle-mlp";
+  const spotlightColor1 = isKaggleModel 
+    ? "bg-green-500/40 dark:bg-green-500/50" 
+    : "bg-blue-500/40 dark:bg-blue-500/50";
+  const spotlightColor2 = isKaggleModel 
+    ? "bg-green-400/30 dark:bg-green-400/40" 
+    : "bg-blue-400/30 dark:bg-blue-400/40";
+
   return (
     <div className={theme === "dark" ? "dark" : ""}>
       <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white transition-colors duration-300">
@@ -58,6 +69,14 @@ export default function Home() {
               </p>
             </div>
             <div className="flex items-center gap-4">
+              {/* Model Selector - only show in detection mode */}
+              {!isQuizMode && (
+                <ModelSelector 
+                  selectedModel={selectedModel} 
+                  onModelChange={setSelectedModel} 
+                />
+              )}
+              
               {/* Quiz Mode Toggle */}
               <button
                 onClick={toggleMode}
@@ -110,6 +129,7 @@ export default function Home() {
                     {/* Camera View for Quiz */}
                     <CameraView
                       onDetection={handleDetection}
+                      modelType={selectedModel}
                     />
                   </div>
                 )}
@@ -148,16 +168,17 @@ export default function Home() {
             /* Detection Mode */
             <>
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-20 relative">
-                {/* Animated Background Spotlights */}
+                {/* Animated Background Spotlights - color changes based on model */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                  <div className="absolute w-[700px] h-[700px] bg-blue-500/40 dark:bg-blue-500/50 rounded-full blur-[130px] animate-spotlight-bg" />
-                  <div className="absolute w-[500px] h-[500px] bg-blue-400/30 dark:bg-blue-400/40 rounded-full blur-[100px] animate-spotlight-bg-2" />
+                  <div className={`absolute w-[700px] h-[700px] ${spotlightColor1} rounded-full blur-[130px] animate-spotlight-bg transition-colors duration-500`} />
+                  <div className={`absolute w-[500px] h-[500px] ${spotlightColor2} rounded-full blur-[100px] animate-spotlight-bg-2 transition-colors duration-500`} />
                 </div>
 
                 {/* Camera View - Takes 3 columns */}
                 <div className="lg:col-span-3 relative z-10">
                   <CameraView
                     onDetection={handleDetection}
+                    modelType={selectedModel}
                   />
                 </div>
 

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera, CameraOff, Loader2 } from "lucide-react";
 import { useASLDetection } from "@/hooks/useASLDetection";
+import { ModelType } from "@/components/ModelSelector";
 
 interface Prediction {
   letter: string;
@@ -11,9 +12,10 @@ interface Prediction {
 
 interface CameraViewProps {
   onDetection: (letter: string, confidence: number, topPredictions?: Prediction[]) => void;
+  modelType?: ModelType;
 }
 
-export function CameraView({ onDetection }: CameraViewProps) {
+export function CameraView({ onDetection, modelType = "mlp" }: CameraViewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -23,6 +25,7 @@ export function CameraView({ onDetection }: CameraViewProps) {
     videoRef,
     canvasRef,
     isActive: isCameraActive,
+    modelType,
     onDetection,
   });
 
@@ -68,11 +71,19 @@ export function CameraView({ onDetection }: CameraViewProps) {
     }
   };
 
+  // Determine spotlight color based on model type
+  const isKaggleModel = modelType === "kaggle-mlp";
+  const spotlightColor = isKaggleModel 
+    ? "bg-green-500/35 dark:bg-green-500/30" 
+    : "bg-blue-500/35 dark:bg-blue-500/30";
+  const indicatorColor = isKaggleModel ? "bg-green-500" : "bg-blue-500";
+  const borderColor = isKaggleModel ? "border-green-500/50" : "border-blue-500/50";
+
   return (
     <div className="relative rounded-2xl overflow-hidden border border-black/20 dark:border-white/20 backdrop-blur-xl bg-white/40 dark:bg-black/40 shadow-2xl">
-      {/* Animated Blue Spotlight Background */}
+      {/* Animated Spotlight Background - color changes based on model */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
-        <div className="absolute w-[500px] h-[500px] bg-blue-500/35 dark:bg-blue-500/30 rounded-full blur-[120px] animate-spotlight-centered" />
+        <div className={`absolute w-[500px] h-[500px] ${spotlightColor} rounded-full blur-[120px] animate-spotlight-centered transition-colors duration-500`} />
       </div>
 
       {/* Video Container */}
@@ -117,16 +128,14 @@ export function CameraView({ onDetection }: CameraViewProps) {
         {/* Detection Indicator */}
         {isCameraActive && (
           <div className="absolute top-4 right-4 z-40">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 dark:bg-black/90 backdrop-blur-xl border border-blue-500/50 shadow-lg">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 dark:bg-black/90 backdrop-blur-xl border ${borderColor} shadow-lg transition-colors duration-300`}>
+              <div className={`w-2 h-2 ${indicatorColor} rounded-full animate-pulse transition-colors duration-300`} />
               <span className="text-sm">
-                Detecting
+                {isKaggleModel ? "Kaggle MLP" : "MLP"} Detecting
               </span>
             </div>
           </div>
         )}
-
-
       </div>
 
       {/* Controls */}
@@ -136,7 +145,7 @@ export function CameraView({ onDetection }: CameraViewProps) {
             <p className="mb-1 font-medium">Camera Feed</p>
             <p className="text-black/60 dark:text-white/60 text-sm">
               {isCameraActive
-                ? "Real-time ASL detection"
+                ? `Real-time ASL detection (${isKaggleModel ? "Kaggle MLP Model" : "MLP Model"})`
                 : "Start camera to begin detection"}
             </p>
           </div>
@@ -163,4 +172,3 @@ export function CameraView({ onDetection }: CameraViewProps) {
     </div>
   );
 }
-
