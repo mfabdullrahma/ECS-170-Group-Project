@@ -1,18 +1,44 @@
-# ASL Live Translator
+## Where to download dataset
 
-Real-time ASL detection and quiz app running in the browser.
+https://www.kaggle.com/datasets/grassknoted/asl-alphabet
 
-## Quick Start
+## Set up Virtual Environment 
 
-### 1. Install Dependencies
+Ensure to set up your virtual environment and install requirements
+
+## How to train models
+
+Step 1 - Preprocess Data
+
 ```bash
-cd frontend
-npm install
+python training/preprocess.py
 ```
 
-### 2. Run the App
+Step 2 - Train Models
+
 ```bash
-npm run dev
+python training/train_mlp.py
+```
+```bash
+python training/train_lstm.py --augment-only
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Step 3 - Export to TensorFlow.js
+
+```bash
+python training/export_models.py
+```
+
+Step 4 - Copy to frontend
+
+```bash
+cp -r models/tfjs/* frontend/public/models/
+```
+
+## Running Frontend
+```bash
+pnpm install
+```
+```bash
+pnpm run dev
+```
